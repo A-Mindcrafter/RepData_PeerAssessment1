@@ -1,6 +1,9 @@
+<<<<<<< HEAD
 ---
 output: pdf_document
 ---
+=======
+>>>>>>> 80edf39c3bb508fee88e3394542f967dd3fd3270
 ## Introduction
 
 It is now possible to collect a large amount of data about personal

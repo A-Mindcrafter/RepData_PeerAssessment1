@@ -1,5 +1,6 @@
 # Reproducible Research: Peer Assessment 1
 
+<<<<<<< HEAD
 This document will include several **R code chunks** to load data and do some analyses. 
 
 The data consists of two months of data from an anonymous individual collected during the monts of October and November, 2012 and include the number of steps taken in 5 minute intervals each day.  
@@ -242,3 +243,23 @@ legend("topright",
 ![](PA1_template_files/figure-html/compare-1.png) 
 
 We can see that this person is more active from 10:00 to 19:00 during weekends.
+=======
+
+## Loading and preprocessing the data
+
+
+
+## What is mean total number of steps taken per day?
+
+
+
+## What is the average daily activity pattern?
+
+
+
+## Imputing missing values
+
+
+
+## Are there differences in activity patterns between weekdays and weekends?
+>>>>>>> 80edf39c3bb508fee88e3394542f967dd3fd3270
