@@ -1,0 +1,195 @@
+---
+title: "Reproducible Research: Peer Assessment 1"
+output: 
+  html_document:
+    keep_md: true
+---
+
+This document will include several **R code chunks** to load data and do some analyses. 
+
+The data consists of two months of data from an anonymous individual collected during the monts of October and November, 2012 and include the number of steps taken in 5 minute intervals each day.  
+
+
+## Loading and preprocessing the data
+
+Load (i.e. `read.csv()`) and show the summary of the data before we process it.
+
+```{r loaddata, echo = TRUE}
+oridata <- read.csv("./data/activity.csv", sep = ",", header = TRUE, 
+                    colClasses = c('numeric', "Date", "integer"))
+summary(oridata)
+```
+
+From the summary, the maximum 5-minute time interval is `r max(oridata$interval)`. But total minutes in a day will be 24 hours x 60 minutes/hour = 1440 minutes. So we need to look at the data closely.
+
+Let's show the data from row 10 to 15.
+
+```{r row10torow15, echo = TRUE}
+oridata[10:15,]
+```
+
+```{r reformate, echo = FALSE}
+reformate <- function(x){
+                      if (nchar(x) == 1){
+                              hr <- "00"
+                              mins <- paste("0", x, sep = "")
+                      } else if (nchar(x) == 2){
+                              hr <- "00"
+                              mins <- x
+                      } else if (nchar(x) == 3){
+                              hr <- paste("0", substr(x, 1, 1), sep = "")
+                              mins <- substr(x, 2, 3)
+                      } else{
+                              hr <- substr(x, 1, 2)
+                              mins <- substr(x, 3, 4)
+                      }
+                      
+                      t <- paste(hr, mins, sep = ":")
+                      t
+}
+```
+
+We see that the time interval changes from 55 to 100. Apparently, the time interval is in the formate of **hours:minutes**. Thus, 55 as `r reformate(55)`, 100 as `r reformate(100)`, and 2355 as `r reformate(2355)`.
+
+## What is mean of total number of steps taken per day?
+
+First, we make the histogram of total steps taken per day.
+
+```{r totalstepsdaily, echo = TRUE, fig.height = 4}
+totalstepsdaily <- aggregate(steps ~ date, data = oridata, FUN = sum, na.rm = TRUE)
+
+hist(totalstepsdaily$steps,
+     breaks = seq(0, 25000, by = 2500),
+     main = "Histogram of Total Steps Per Day",
+     xlab = "Total steps taken per day",
+     col = "red")
+```
+
+We calculate the **mean** and **median** total number of steps taken per day.
+
+```{r meanNmedian, echo = TRUE}
+meansteps <- mean(totalstepsdaily$steps)
+mediansteps <- median(totalstepsdaily$steps)
+```
+
+The **mean** of total steps taken daily is **`r meansteps`** steps. And the **median** of total steps taken daily is **`r mediansteps`** steps.
+
+## What is the average daily activity pattern?
+
+Make a time series plot(i.e. `type = "l"`) of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days (y-axis)
+
+```{r dailypattern, echo = TRUE, fig.height = 4}
+
+## Calculate the mean of total steps taken by time intervals
+meanbyInterval <- aggregate(steps ~ interval, data = oridata, FUN = mean, na.rm = TRUE)
+
+plot(meanbyInterval$interval,
+     meanbyInterval$steps,
+     type = "l",
+     main = "Average Daily Activity Pattern",
+     xlab = "Time Interval",
+     ylab = "Average Steps")
+```
+
+Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?
+
+```{r maxstepsdaily, echo = TRUE}
+maxdaily <- meanbyInterval[meanbyInterval$steps == max(meanbyInterval$steps),]$interval
+```
+
+The 5-minute interval, **`r maxdaily`**, contains the maximum steps daily; i.e. this person is most active at **`r reformate(maxdaily)`** during a day.
+
+## Imputing missing values
+
+Calculate and report the total number of missing values in the dataset (i.e. the total number of rows with `NA`s)
+
+```{r NArows, echo = TRUE}
+sum(is.na(oridata$steps))
+```
+
+Devise a strategy for filling in all of the missing values in the dataset. The strategy does not need to be sophisticated. For example, you could use the mean/median for that day, or the mean for that 5-minute interval, etc.
+
+```{r fillNA, echo = TRUE}
+## Subset the rows with steps == NA
+isNA <- oridata[is.na(oridata$steps),]
+
+## Subset the rows of valid steps value
+notNA <- oridata[!is.na(oridata$steps),]
+
+## Drop the "NA" column, and then fill in the mean of steps by time intervals
+isNA <- subset(isNA, select = - steps)
+fillNA <- merge(isNA, meanbyInterval, by = "interval")
+```
+
+Create a new dataset that is equal to the original dataset but with the missing data filled in.
+
+```{r createnewdataset, echo = TRUE}
+newdata <- rbind(notNA, fillNA)
+newdata <- newdata[order(newdata$date, newdata$interval),]
+rownames(newdata) <- rownames(oridata)
+```
+
+Now let's see the top 6 rows of the original dataset and the new dataset
+
+```{r top6rows, echo = TRUE}
+head(oridata)
+head(newdata)
+```
+
+
+Make a histogram of the total number of steps taken each day and Calculate and report the **mean** and **median** total number of steps taken per day. Do these values differ from the estimates from the first part of the assignment? What is the impact of imputing missing data on the estimates of the total daily number of steps?
+
+```{r newhistogram, echo = TRUE, fig.height = 4}
+newtotaldaily <- aggregate(steps ~ date, data = newdata, FUN = sum, na.rm = TRUE)
+hist(newtotaldaily$steps,
+     breaks = seq(0, 25000, by = 2500),
+     main = "Histogram of Total Steps Per Day From New Dataset",
+     xlab = "Total steps taken per day",
+     col = "blue")
+```
+
+```{r newmeanNmedian, echo = TRUE}
+newmean <- mean(newtotaldaily$steps)
+newmedian <- median(newtotaldaily$steps)
+```
+
+The **mean** of total steps daily from the new dataset is `r newmean`.
+The **median** of total steps daily from the new dataset is `r newmedian`.
+
+```{r difference, echo = TRUE}
+newmean - newmedian
+```
+
+After imputing the missing values with the mean of total steps taken for the 5-minute time intervals, the median is equal to the mean.
+
+## Are there differences in activity patterns between weekdays and weekends?
+
+Let's plot the activity patterns of weekdays and weekends
+
+```{r compare, echo = TRUE, fig.height = 4}
+oridata$weekdays <- lapply(oridata$date, function(date) date <- weekdays(date, abbreviate = TRUE))
+weekend <- oridata[oridata$weekdays %in% c("Sat", "Sun"),]
+weekday <- oridata[oridata$weekdays %in% c("Mon", "Tue", "Wed", "Thu", "Fri"),]
+
+weekendPattern <- aggregate(steps ~ interval, data = weekend, FUN = mean, na.rm = TRUE)
+weekdayPattern <- aggregate(steps ~ interval, data = weekday, FUN = mean, na.rm = TRUE)
+
+plot(weekdayPattern$interval,
+     weekdayPattern$steps,
+     type = "l",
+     col = "blue",
+     main = "Average Activity Pattern",
+     xlab = "Time Interval",
+     ylab = "Average Steps")
+
+lines(weekendPattern$interval,
+      weekendPattern$steps,
+      col = "red")
+
+legend("topright",
+       lty = 1, 
+       col = c("blue", "red"),
+       legend = c("Weekdays", "Weekends"))
+```
+
+We can see that this person is more active from `r reformate(1000)` to `r reformate(1900)` during weekends.
