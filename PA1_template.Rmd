@@ -193,4 +193,6 @@ xyplot (steps ~ interval | factor(daytype),
         main = "Weekday vs Weekend Daily Activity Pattern")
 ```
 
-***During weekdays, this person is very active from `r reformate(830)` to `r reformate(930)`. By comparing the two daily patterns, we can see that the person is more active from `r reformate(1000)` to `r reformate(1700)` during weekends.***
+***During weekdays, this person is very active from `r reformate(830)` to `r reformate(930)`.***
+
+***By comparing the two daily patterns, we can see that the person is more active from `r reformate(1000)` to `r reformate(1700)` during weekends.***

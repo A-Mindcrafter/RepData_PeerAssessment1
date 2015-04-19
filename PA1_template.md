@@ -241,4 +241,6 @@ xyplot (steps ~ interval | factor(daytype),
 
 ![](PA1_template_files/figure-html/panelplot-1.png) 
 
-***During weekdays, this person is very active from 08:30 to 09:30. By comparing the two daily patterns, we can see that the person is more active from 10:00 to 17:00 during weekends.***
+***During weekdays, this person is very active from 08:30 to 09:30.***
+
+***By comparing the two daily patterns, we can see that the person is more active from 10:00 to 17:00 during weekends.***
