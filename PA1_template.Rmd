@@ -164,32 +164,33 @@ After imputing the missing values with the mean of total steps taken for the 5-m
 
 ## Are there differences in activity patterns between weekdays and weekends?
 
-Let's plot the activity patterns of weekdays and weekends
+Create a new factor variable in the dataset, $daytype, with two levels, "weekday" and "weekend".
 
-```{r compare, echo = TRUE, fig.height = 4}
-oridata$weekdays <- lapply(oridata$date, function(date) date <- weekdays(date, abbreviate = TRUE))
-weekend <- oridata[oridata$weekdays %in% c("Sat", "Sun"),]
-weekday <- oridata[oridata$weekdays %in% c("Mon", "Tue", "Wed", "Thu", "Fri"),]
+```{r newlevels, echo = TRUE}
+types <- function(date) {
+    if(weekdays(as.Date(date)) %in% c("Saturday", "Sunday")){
+        "Weekend"
+    } else{
+        "Weekday"
+    }
+}
 
-weekendPattern <- aggregate(steps ~ interval, data = weekend, FUN = mean, na.rm = TRUE)
-weekdayPattern <- aggregate(steps ~ interval, data = weekday, FUN = mean, na.rm = TRUE)
-
-plot(weekdayPattern$interval,
-     weekdayPattern$steps,
-     type = "l",
-     col = "blue",
-     main = "Average Activity Pattern",
-     xlab = "Time Interval",
-     ylab = "Average Steps")
-
-lines(weekendPattern$interval,
-      weekendPattern$steps,
-      col = "red")
-
-legend("topright",
-       lty = 1, 
-       col = c("blue", "red"),
-       legend = c("Weekdays", "Weekends"))
+oridata$daytype <- as.factor(sapply(oridata$date, types))
+ 
 ```
 
-We can see that this person is more active from `r reformate(1000)` to `r reformate(1900)` during weekends.
+Make a panel plot containing a time series plot (i.e. `type = "l"`) of the 5-minute interval (x-axis) and the average number of steps taken (y-axis), averaged across all weekday days or weekend days.
+
+```{r panelplot, echo = TRUE, fig.height = 8}
+
+typePatterns <- aggregate(steps ~ interval + daytype, data = oridata, FUN = mean, na.rm = TRUE)
+
+library(lattice)
+xyplot (steps ~ interval | factor(daytype),
+        data = typePatterns, type = "l",
+        xlab = "Time Interval",
+        ylab = "Average Steps",
+        main = "Weekday vs Weekend Activity Pattern")
+```
+
+We can see that this person is ***more active from `r reformate(1000)` to `r reformate(1900)` during weekends***.

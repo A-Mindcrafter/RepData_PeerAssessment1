@@ -210,35 +210,35 @@ After imputing the missing values with the mean of total steps taken for the 5-m
 
 ## Are there differences in activity patterns between weekdays and weekends?
 
-Let's plot the activity patterns of weekdays and weekends
+Create a new factor variable in the dataset, $daytype, with two levels, "weekday" and "weekend".
 
 
 ```r
-oridata$weekdays <- lapply(oridata$date, function(date) date <- weekdays(date, abbreviate = TRUE))
-weekend <- oridata[oridata$weekdays %in% c("Sat", "Sun"),]
-weekday <- oridata[oridata$weekdays %in% c("Mon", "Tue", "Wed", "Thu", "Fri"),]
+types <- function(date) {
+    if(weekdays(as.Date(date)) %in% c("Saturday", "Sunday")){
+        "Weekend"
+    } else{
+        "Weekday"
+    }
+}
 
-weekendPattern <- aggregate(steps ~ interval, data = weekend, FUN = mean, na.rm = TRUE)
-weekdayPattern <- aggregate(steps ~ interval, data = weekday, FUN = mean, na.rm = TRUE)
-
-plot(weekdayPattern$interval,
-     weekdayPattern$steps,
-     type = "l",
-     col = "blue",
-     main = "Average Activity Pattern",
-     xlab = "Time Interval",
-     ylab = "Average Steps")
-
-lines(weekendPattern$interval,
-      weekendPattern$steps,
-      col = "red")
-
-legend("topright",
-       lty = 1, 
-       col = c("blue", "red"),
-       legend = c("Weekdays", "Weekends"))
+oridata$daytype <- as.factor(sapply(oridata$date, types))
 ```
 
-![](PA1_template_files/figure-html/compare-1.png) 
+Make a panel plot containing a time series plot (i.e. `type = "l"`) of the 5-minute interval (x-axis) and the average number of steps taken (y-axis), averaged across all weekday days or weekend days.
 
-We can see that this person is more active from 10:00 to 19:00 during weekends.
+
+```r
+typePatterns <- aggregate(steps ~ interval + daytype, data = oridata, FUN = mean, na.rm = TRUE)
+
+library(lattice)
+xyplot (steps ~ interval | factor(daytype),
+        data = typePatterns, type = "l",
+        xlab = "Time Interval",
+        ylab = "Average Steps",
+        main = "Weekday vs Weekend Activity Pattern")
+```
+
+![](PA1_template_files/figure-html/panelplot-1.png) 
+
+We can see that this person is ***more active from 10:00 to 19:00 during weekends***.
