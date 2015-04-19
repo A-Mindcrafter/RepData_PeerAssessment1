@@ -206,7 +206,7 @@ newmean - newmedian
 ## [1] 0
 ```
 
-After imputing the missing values with the mean of total steps taken for the 5-minute time intervals, the median is equal to the mean.
+***After imputing the missing values with the mean of total steps taken for the 5-minute time intervals, the median is equal to the mean.***
 
 ## Are there differences in activity patterns between weekdays and weekends?
 
@@ -236,9 +236,9 @@ xyplot (steps ~ interval | factor(daytype),
         data = typePatterns, type = "l",
         xlab = "Time Interval",
         ylab = "Average Steps",
-        main = "Weekday vs Weekend Activity Pattern")
+        main = "Weekday vs Weekend Daily Activity Pattern")
 ```
 
 ![](PA1_template_files/figure-html/panelplot-1.png) 
 
-We can see that this person is ***more active from 10:00 to 19:00 during weekends***.
+***During weekdays, this person is very active from 08:30 to 09:30. By comparing the two daily patterns, we can see that the person is more active from 10:00 to 17:00 during weekends.***
